@@ -1,123 +1,190 @@
-#include "TXLib.h"
-const float dt = 50;
-bool move = false;
-int radius = 50;
-const int childRadius = 10;
-float childx = 100*(rand() % 5);
-float childy = 100*(rand() % 5);
-float x=400;
-float y=300;
-float vx=0;
-float vy=0;
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
 
-void drawBall(float x, float y, int radius)
-{
-    txSetFillColor(RGB(0,255,0));
-    txSetColor(RGB(0,100,0));
-    txCircle(x,y,radius);
-    txSetFillColor(RGB(0,15,0));
-}
+#include <fstream>
+#include <vector>
+#include <string>
+#include <sstream>
 
-void moveBall(float vx, float vy, float dt)
-{
-    if (x < 0 || x > 800)
-        vy = -vy;
-    if (y < 0 || y > 600)
-        vx = -vx;
-    x += vx * dt;
-    y += vy * dt;
-}
-
-bool checkPosition()
-{
-
-    if (abs(x - childx) < (radius + childRadius) && abs(y - childy) < (radius + childRadius))
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
+using namespace std;
 
 int main()
 {
-    txCreateWindow(800,600);
 
+    //container initialization
+    std::vector<int> numbers;
+    std::string line;
+    int lineNumbers = 0;
+    int linesCount = 0;
+    ifstream inputFile("IslandMap");
 
-    drawBall (childx,childy,childRadius);
-    drawBall (x, y, radius);
+    if (inputFile.good()) {
 
-    for (;;)
-    {
-        move = false;
+        int current_number = 0;
 
-        if (GetAsyncKeyState(VK_SPACE))
+        //read the file
+        while(std::getline(inputFile, line))
+        //while(inputFile >> current_number)
         {
-            exit(0);
-            return 0;
+            std::stringstream linestream(line);
+            lineNumbers = 0;
+
+            while(linestream >> current_number) {
+
+                //container fill in
+                numbers.push_back(current_number);
+                lineNumbers++;
+            }
+
+            linesCount++;
+        }
+        inputFile.close();
+
+        //print the file contents
+        cout << endl;
+        cout << "Lines in file: " << linesCount << endl;
+        cout << endl;
+        cout << "Numbers per line in file: " << lineNumbers << endl;
+
+        for (int count = 0; count < numbers.size(); count++) {
+
+            if (count % lineNumbers != 0) {
+
+                cout << numbers[count] << " ";
+
+            } else {
+
+                cout << endl;
+                cout << numbers[count] << " ";
+            }
+
         }
 
+        cout << endl;
+        cout << endl;
 
-        if (GetAsyncKeyState(VK_LEFT))
-        {
-            vx = -0.1;
-            vy = 0;
-            move = true;
-        }
+        //calc islands
+        int islandCount = 0;
+        int currentLine = 0;
+        int previousLine = 0;
 
-        if (GetAsyncKeyState(VK_RIGHT))
-        {
-            vx = 0.1;
-            vy = 0;
-            move = true;
-        }
+        for (int count = 0; count < numbers.size(); count++) {
 
-        if (GetAsyncKeyState(VK_UP))
-        {
-            vy = -0.1;
-            vx = 0;
-            move = true;
-        }
+            if (count % lineNumbers == 0) {
 
-        if (GetAsyncKeyState(VK_DOWN))
-        {
-            vy = 0.1;
-            vx = 0;
-            move = true;
-        }
+                currentLine++;
 
-        if (move)
-        {
+            }
 
-            if (checkPosition())
-            {
-                radius = radius + childRadius;
+            if (numbers[count] == 1) {
 
-                if (radius > 100)
-                {
-                    txClear();
-                    drawBall(x, y, radius);
-                    printf("%s \n", "Game over");
-                    exit(0);
-                    return 0;
+                //cout << count << " " << currentLine << " " << previousLine << " s ";
+
+                if ((count > 0) && (numbers[count - 1] == 0) && (currentLine == previousLine)) {
+
+                    if (count > lineNumbers) {
+
+                        if (numbers[count - lineNumbers] == 0) {
+
+                            if ((count + lineNumbers) < numbers.size()) {
+
+                                if (numbers[count + lineNumbers] == 0) {
+
+                                    //cout << " islandCount increase on: " << count << " i ";
+                                    islandCount++;
+
+                                }
+
+                            } else {
+
+                                //cout << " islandCount increase on: " << count << " i ";
+                                islandCount++;
+
+                            }
+                        }
+
+                    } else {
+
+                        if ((count + lineNumbers) < numbers.size()) {
+
+                            if (numbers[count + lineNumbers] == 0) {
+
+                                //cout << " islandCount increase on: " << count << " i ";
+                                islandCount++;
+
+                            }
+
+                        } else {
+
+                            //cout << " islandCount increase on: " << count << " i ";
+                            islandCount++;
+
+                        }
+
+                    }
+
+                } else if ((count > 0) && (currentLine != previousLine)) {
+
+
+                    if (count > lineNumbers) {
+
+                        if (numbers[count - lineNumbers] == 0) {
+
+                            if ((count + lineNumbers) < numbers.size()) {
+
+                                if (numbers[count + lineNumbers] == 0) {
+
+                                    //cout << " islandCount increase on: " << count << " i ";
+                                    islandCount++;
+
+                                }
+
+                            }
+
+                        } else {
+
+                            //cout << " islandCount increase on: " << count << " i ";
+                            islandCount++;
+
+                        }
+
+                    } else {
+
+                        //cout << " islandCount increase on: " << count << " i ";
+                        islandCount++;
+                    }
+
+                } else {
+
+                    if (count == 0) {
+
+                        //cout << " islandCount increase on: " << count << " i ";
+                        islandCount++;
+
+                    }
+
                 }
 
-                childx = 100*(1 + rand() % 7);
-                childy = 100*(1 + rand() % 5);
             }
-            //txClear erases everything, need to draw two balls again
-            txClear();
-            drawBall (childx,childy,childRadius);
-            moveBall(vx, vy, dt);
-            drawBall(x, y, radius);
+
+            if (count % lineNumbers == 0) {
+
+                previousLine++;
+
+            }
+
         }
 
-        txSleep(dt);
+        cout << "Number of islands: " << islandCount << endl;
+        cout << endl;
+
+
+    } else {
+
+        cout << "Error!";
+
     }
 
-    txDestroyWindow();
     return 0;
 }
