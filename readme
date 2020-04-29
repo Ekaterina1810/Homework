@@ -1,0 +1,15 @@
+in one terminal:
+cd folder
+g++ Server.cpp -o server -lsfml-network -lsfml-system -lpthread -std=c++11
+./server
+
+in another terminal:
+cd folder
+g++ Client.cpp ChatBox.cpp -o client -lsfml-network -lsfml-system -lpthread -lsfml-window -lsfml-graphics -std=c++11
+./client
+
+in n+1 terminal:
+cd folder
+./client
+
+
